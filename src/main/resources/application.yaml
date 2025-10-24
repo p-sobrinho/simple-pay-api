@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: "simple-payment-api"
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
