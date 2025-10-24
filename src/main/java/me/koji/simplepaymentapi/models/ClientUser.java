@@ -1,7 +1,6 @@
 package me.koji.simplepaymentapi.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,11 +9,11 @@ import me.koji.simplepaymentapi.types.ClientUserType;
 
 import java.math.BigDecimal;
 
-@Entity
+@Entity @Table(name = "users")
 @Getter @Setter
 @AllArgsConstructor @NoArgsConstructor
 public class ClientUser {
-    @Id
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String firstName;
     private String lastName;
