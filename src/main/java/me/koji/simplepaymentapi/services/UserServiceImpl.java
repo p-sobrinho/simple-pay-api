@@ -1,14 +1,18 @@
 package me.koji.simplepaymentapi.services;
 
+import me.koji.simplepaymentapi.dto.ClientUserDTO;
 import me.koji.simplepaymentapi.models.ClientUser;
 import me.koji.simplepaymentapi.repository.UserRepository;
 import me.koji.simplepaymentapi.services.contracts.UserService;
+import me.koji.simplepaymentapi.types.ClientUserType;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @Service
@@ -17,6 +21,27 @@ public class UserServiceImpl implements UserService {
 
     public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
+    }
+
+    @Override
+    public ClientUser createUser(
+            Long id, @NotNull String firstName, @NotNull String lastName,
+            @NotNull String email, @NotNull String cpf, @NotNull String password,
+            BigDecimal balance, ClientUserType type
+    ) {
+        if (balance == null) balance = BigDecimal.ZERO;
+        if (type == null) type = ClientUserType.COMMON;
+
+        return new ClientUser(id, firstName, lastName, email, cpf, password, balance, type);
+    }
+
+    @Override
+    public ClientUser createUserByDTO(ClientUserDTO clientUserDTO) {
+        return createUser(
+                clientUserDTO.id(), clientUserDTO.firstName(), clientUserDTO.lastName(),
+                clientUserDTO.email(), clientUserDTO.cpf(), clientUserDTO.password(),
+                clientUserDTO.balance(), clientUserDTO.type()
+        );
     }
 
     @Override
@@ -32,5 +57,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public Page<ClientUser> getAllUsers(Pageable pageable) {
         return userRepository.findAll(pageable);
+    }
+
+    @Override
+    public ClientUser saveUser(ClientUser clientUser) {
+        return userRepository.save(clientUser);
     }
 }
