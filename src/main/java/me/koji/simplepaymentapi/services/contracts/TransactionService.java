@@ -1,6 +1,5 @@
 package me.koji.simplepaymentapi.services.contracts;
 
-import jakarta.persistence.Column;
 import me.koji.simplepaymentapi.dto.ClientTransactionDTO;
 import me.koji.simplepaymentapi.models.ClientTransaction;
 import org.springframework.data.domain.Page;
