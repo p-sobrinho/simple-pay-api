@@ -32,16 +32,15 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<ClientUserDTO>> getAllUsers(Pageable pageable) {
+    public ResponseEntity<Page<ClientUserDTO>> getAllUsers(@RequestBody Pageable pageable) {
         return ResponseEntity.ok(userService.getAllUsers(pageable).map(UserMapper::toDTO));
     }
 
     @PostMapping
-    public ResponseEntity<ClientUserDTO> createUser(ClientUserDTO userDTO) {
+    public ResponseEntity<ClientUserDTO> createUser(@RequestBody ClientUserDTO userDTO) {
         final ClientUser clientUser = userService.createUserByDTO(userDTO);
+        final ClientUser savedUser = userService.saveUser(clientUser);
 
-        userService.saveUser(clientUser);
-
-        return ResponseEntity.ok(UserMapper.toDTO(clientUser));
+        return ResponseEntity.ok(UserMapper.toDTO(savedUser));
     }
 }
