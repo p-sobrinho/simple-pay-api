@@ -1,12 +1,9 @@
 package me.koji.simplepaymentapi.controller;
 
 import me.koji.simplepaymentapi.dto.ClientTransactionDTO;
-import me.koji.simplepaymentapi.dto.ClientUserDTO;
 import me.koji.simplepaymentapi.exceptions.InvalidUserException;
 import me.koji.simplepaymentapi.mappers.TransactionMapper;
-import me.koji.simplepaymentapi.mappers.UserMapper;
 import me.koji.simplepaymentapi.models.ClientTransaction;
-import me.koji.simplepaymentapi.models.ClientUser;
 import me.koji.simplepaymentapi.services.contracts.TransactionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,12 +32,12 @@ public class TransactionController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<ClientTransactionDTO>> getAllUsers(@RequestBody Pageable pageable) {
+    public ResponseEntity<Page<ClientTransactionDTO>> getAllTransactions(@RequestBody Pageable pageable) {
         return ResponseEntity.ok(transactionService.getAllTransactions(pageable).map(TransactionMapper::toDTO));
     }
 
     @PostMapping
-    public ResponseEntity<ClientTransactionDTO> createUser(@RequestBody ClientTransactionDTO userDTO) {
+    public ResponseEntity<ClientTransactionDTO> createTransaction(@RequestBody ClientTransactionDTO userDTO) {
         final ClientTransaction clientTransaction = transactionService.createTransactionByDTO(userDTO);
         final ClientTransaction savedTransaction = transactionService.saveTransaction(clientTransaction);
 
