@@ -12,8 +12,8 @@ import java.util.Optional;
 
 public interface UserService {
     ClientUser createUser(
-            Long id, @NotNull String firstName, @NotNull String lastName,
-            @NotNull String email, @NotNull String cpf, @NotNull String password,
+            Long id, String firstName, String lastName,
+            String email, String cpf, String password,
             BigDecimal balance, ClientUserType type
     );
     ClientUser createUserByDTO(ClientUserDTO clientUserDTO);
