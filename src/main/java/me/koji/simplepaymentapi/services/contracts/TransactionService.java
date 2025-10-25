@@ -1,7 +1,6 @@
 package me.koji.simplepaymentapi.services.contracts;
 
 import me.koji.simplepaymentapi.models.ClientTransaction;
-import me.koji.simplepaymentapi.models.ClientUser;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

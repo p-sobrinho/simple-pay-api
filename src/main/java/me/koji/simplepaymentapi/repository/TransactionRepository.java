@@ -1,6 +1,6 @@
 package me.koji.simplepaymentapi.repository;
 
-import jakarta.transaction.Transaction;
+import me.koji.simplepaymentapi.models.ClientTransaction;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface TransactionRepository extends JpaRepository<Transaction, Long> { }
+public interface TransactionRepository extends JpaRepository<ClientTransaction, Long> { }
