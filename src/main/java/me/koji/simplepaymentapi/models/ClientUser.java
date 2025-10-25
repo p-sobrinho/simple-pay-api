@@ -17,20 +17,22 @@ import java.util.Objects;
 public class ClientUser {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
     private String firstName;
+    @Column(nullable = false)
     private String lastName;
-
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String email;
-
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String cpf;
-
+    @Column(nullable = false)
     private String password;
+    @Column(nullable = false)
     private BigDecimal balance;
 
     @Enumerated(EnumType.STRING)
-    private ClientUserType type;
+    private ClientUserType type = ClientUserType.COMMON; //Default value
 
     @Override
     public final boolean equals(Object other) {
