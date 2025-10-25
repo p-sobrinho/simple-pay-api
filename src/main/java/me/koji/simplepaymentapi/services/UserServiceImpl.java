@@ -5,15 +5,12 @@ import me.koji.simplepaymentapi.models.ClientUser;
 import me.koji.simplepaymentapi.repository.UserRepository;
 import me.koji.simplepaymentapi.services.contracts.UserService;
 import me.koji.simplepaymentapi.types.ClientUserType;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
