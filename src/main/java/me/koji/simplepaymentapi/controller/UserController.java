@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.MessageFormat;
 import java.util.Optional;
 
 @RestController
@@ -26,7 +27,7 @@ public class UserController {
         final Optional<ClientUser> queryUser = userService.findUserById(id);
 
         if (queryUser.isEmpty())
-            throw new InvalidUserException("Unable to find user with id " + id);
+            throw new InvalidUserException("Unable to find user with id: {}.", id);
 
         return ResponseEntity.ok(UserMapper.toDTO(queryUser.get()));
     }
