@@ -13,10 +13,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 public class UserServiceImpl implements UserService {
+    private final List<String> nullablesNotAllowed = List.of("firstName", "lastName", "email", "cpf", "password");
     private final UserRepository userRepository;
 
     public UserServiceImpl(UserRepository userRepository) {
@@ -25,12 +30,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ClientUser createUser(
-            Long id, @NotNull String firstName, @NotNull String lastName,
-            @NotNull String email, @NotNull String cpf, @NotNull String password,
+            Long id, String firstName, String lastName,
+            String email, String cpf, String password,
             BigDecimal balance, ClientUserType type
     ) {
+        if (Stream.of(firstName, lastName, email, cpf, password).anyMatch(Objects::isNull))
+            throw new IllegalArgumentException("Unable to create user one of the following parameters missing: " + nullablesNotAllowed);
+
         if (balance == null) balance = BigDecimal.ZERO;
         if (type == null) type = ClientUserType.COMMON;
+
+        if (findUserById(id).isPresent())
+            throw new IllegalArgumentException("Unable to create user, id \"" + id + "\" already exists.");
 
         return new ClientUser(id, firstName, lastName, email, cpf, password, balance, type);
     }
