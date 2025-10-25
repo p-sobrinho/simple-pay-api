@@ -19,8 +19,13 @@ public class ClientUser {
     private Long id;
     private String firstName;
     private String lastName;
+
+    @Column(unique = true)
     private String email;
+
+    @Column(unique = true)
     private String cpf;
+
     private String password;
     private BigDecimal balance;
 
