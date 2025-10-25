@@ -7,6 +7,7 @@ import me.koji.simplepaymentapi.repository.TransactionRepository;
 import me.koji.simplepaymentapi.repository.UserRepository;
 import me.koji.simplepaymentapi.services.contracts.TransactionService;
 import me.koji.simplepaymentapi.services.contracts.UserService;
+import me.koji.simplepaymentapi.types.ClientUserType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,10 +15,14 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
+    private final List<String> nullablesNotAllowed = List.of("firstName", "lastName", "email", "cpf", "password");
     private final TransactionRepository transactionRepository;
 
     public TransactionServiceImpl(TransactionRepository transactionRepository) {
@@ -29,6 +34,14 @@ public class TransactionServiceImpl implements TransactionService {
             Long id, Long sender, Long receiver,
             String message, BigDecimal value, Instant timestamp
     ) {
+        if (Stream.of(sender, receiver, value, timestamp).anyMatch(Objects::isNull))
+            throw new IllegalArgumentException("Unable to create user one of the following parameters missing: " + nullablesNotAllowed);
+
+        if (value == null) value = BigDecimal.ZERO;
+
+        if (findTransactionById(id).isPresent())
+            throw new IllegalArgumentException("Unable to create transaction, id \"" + id + "\" already exists.");
+
         return new ClientTransaction(id, sender, receiver, message, value, timestamp);
     }
 
