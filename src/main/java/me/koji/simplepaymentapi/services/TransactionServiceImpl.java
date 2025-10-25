@@ -1,5 +1,6 @@
 package me.koji.simplepaymentapi.services;
 
+import me.koji.simplepaymentapi.dto.ClientTransactionDTO;
 import me.koji.simplepaymentapi.models.ClientTransaction;
 import me.koji.simplepaymentapi.models.ClientUser;
 import me.koji.simplepaymentapi.repository.TransactionRepository;
@@ -11,6 +12,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Optional;
 
 @Service
@@ -19,6 +22,22 @@ public class TransactionServiceImpl implements TransactionService {
 
     public TransactionServiceImpl(TransactionRepository transactionRepository) {
         this.transactionRepository = transactionRepository;
+    }
+
+    @Override
+    public ClientTransaction createTransaction(
+            Long id, Long sender, Long receiver,
+            String message, BigDecimal value, Instant timestamp
+    ) {
+        return new ClientTransaction(id, sender, receiver, message, value, timestamp);
+    }
+
+    @Override
+    public ClientTransaction createTransactionByDTO(ClientTransactionDTO clientTransactionDTO) {
+        return createTransaction(
+                clientTransactionDTO.id(), clientTransactionDTO.sender(), clientTransactionDTO.receiver(),
+                clientTransactionDTO.message(), clientTransactionDTO.value(), clientTransactionDTO.timestamp()
+        );
     }
 
     @Override
@@ -34,6 +53,11 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Page<ClientTransaction> getAllTransactions(Pageable pageable) {
         return transactionRepository.findAll(pageable);
+    }
+
+    @Override
+    public ClientTransaction saveTransaction(ClientTransaction clientTransaction) {
+        return null;
     }
 }
 
