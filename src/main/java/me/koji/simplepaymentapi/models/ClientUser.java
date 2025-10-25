@@ -33,6 +33,13 @@ public class ClientUser {
     @Enumerated(EnumType.STRING)
     private ClientUserType type = ClientUserType.COMMON; //Default value
 
+    public BigDecimal addBalance(BigDecimal amount) {
+        return balance.add(amount);
+    }
+    public BigDecimal subtractBalance(BigDecimal amount) {
+        return balance.subtract(amount);
+    }
+
     @Override
     public final boolean equals(Object other) {
         if (other == null) return false;
