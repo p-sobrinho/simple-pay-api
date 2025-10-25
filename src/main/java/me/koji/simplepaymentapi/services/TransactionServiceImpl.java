@@ -1,9 +1,14 @@
 package me.koji.simplepaymentapi.services;
 
 import me.koji.simplepaymentapi.dto.ClientTransactionDTO;
+import me.koji.simplepaymentapi.exceptions.InvalidUserException;
 import me.koji.simplepaymentapi.models.ClientTransaction;
+import me.koji.simplepaymentapi.models.ClientUser;
 import me.koji.simplepaymentapi.repository.TransactionRepository;
+import me.koji.simplepaymentapi.repository.UserRepository;
 import me.koji.simplepaymentapi.services.contracts.TransactionService;
+import me.koji.simplepaymentapi.services.contracts.UserService;
+import me.koji.simplepaymentapi.types.ClientUserType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,11 +23,13 @@ import java.util.stream.Stream;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
-    private final List<String> nullablesNotAllowed = List.of("firstName", "lastName", "email", "cpf", "password");
+    private final List<String> nullablesNotAllowed = List.of("sender", "receiver", "value", "timestamp");
     private final TransactionRepository transactionRepository;
+    private final UserService userService;
 
-    public TransactionServiceImpl(TransactionRepository transactionRepository) {
+    public TransactionServiceImpl(TransactionRepository transactionRepository, UserService userService) {
         this.transactionRepository = transactionRepository;
+        this.userService = userService;
     }
 
     @Override
@@ -35,8 +42,17 @@ public class TransactionServiceImpl implements TransactionService {
 
         if (value == null) value = BigDecimal.ZERO;
 
-        if (findTransactionById(id).isPresent())
-            throw new IllegalArgumentException("Unable to create transaction, id \"" + id + "\" already exists.");
+        if (id != null) {
+            if (findTransactionById(id).isPresent())
+                throw new IllegalArgumentException("Unable to create transaction, id \"" + id + "\" already exists.");
+        }
+
+        final Optional<ClientUser> senderUserOptional = userService.findUserById(sender);
+
+        senderUserOptional.ifPresent((senderUser) -> {
+            if (senderUser.getType() == ClientUserType.MERCHANT)
+                throw new IllegalArgumentException("Unable to create transaction, merchant users can't make transactions.");
+        });
 
         return new ClientTransaction(id, sender, receiver, message, value, timestamp);
     }
@@ -66,7 +82,28 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public ClientTransaction saveTransaction(ClientTransaction clientTransaction) {
-        return null;
+        final Optional<ClientUser> senderUserOptional = userService.findUserById(clientTransaction.getSender());
+        final Optional<ClientUser> receiverUserOptional = userService.findUserById(clientTransaction.getReceiver());
+
+        if (senderUserOptional.isEmpty() || receiverUserOptional.isEmpty())
+            throw new InvalidUserException("Transaction can't be saved, sender user or receiver user is invalid.");
+
+        final ClientUser sender = senderUserOptional.get();
+        final ClientUser receiver = receiverUserOptional.get();
+
+        if (sender.getType() == ClientUserType.MERCHANT)
+            throw new IllegalArgumentException("Transaction not allowed, merchants can't make transactions.");
+
+        sender.subtractBalance(clientTransaction.getValue());
+        receiver.addBalance(clientTransaction.getValue());
+
+        // To make sure that transaction can be saved before charging from sender.
+        final ClientTransaction savedTransaction = transactionRepository.save(clientTransaction);
+
+        userService.saveUser(sender);
+        userService.saveUser(receiver);
+
+        return savedTransaction;
     }
 }
 
