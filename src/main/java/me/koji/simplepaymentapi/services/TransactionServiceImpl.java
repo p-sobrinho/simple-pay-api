@@ -37,11 +37,6 @@ public class TransactionServiceImpl implements TransactionService {
             Long id, Long sender, Long receiver,
             String message, BigDecimal value, Instant timestamp
     ) {
-        if (Stream.of(sender, receiver, value, timestamp).anyMatch(Objects::isNull))
-            throw new IllegalArgumentException("Unable to create user one of the following parameters missing: " + nullablesNotAllowed);
-
-        if (value == null) value = BigDecimal.ZERO;
-
         final Optional<ClientUser> senderUserOptional = userService.findUserById(sender);
 
         senderUserOptional.ifPresent((senderUser) -> {
