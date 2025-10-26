@@ -3,6 +3,9 @@ package me.koji.simplepaymentapi.controller;
 import me.koji.simplepaymentapi.dto.ServerInternalErrorDTO;
 import me.koji.simplepaymentapi.exceptions.InvalidUserException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -16,5 +19,16 @@ public class ExceptionController {
     @ExceptionHandler(InvalidUserException.class)
     public ResponseEntity<ServerInternalErrorDTO> handleInvalidUser(InvalidUserException exception) {
         return ResponseEntity.internalServerError().body(new ServerInternalErrorDTO(exception.getMessage(), 500));
+    }
+
+    @ExceptionHandler({
+            HttpMessageNotReadableException.class,
+            MethodArgumentNotValidException.class,
+            MissingServletRequestParameterException.class
+    })
+    public ResponseEntity<ServerInternalErrorDTO> handleBadRequest(Exception ex) {
+        return ResponseEntity
+                .badRequest()
+                .body(new ServerInternalErrorDTO(ex.getMessage(), 400));
     }
 }
