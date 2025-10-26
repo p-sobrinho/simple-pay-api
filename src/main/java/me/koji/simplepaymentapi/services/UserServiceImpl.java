@@ -1,5 +1,6 @@
 package me.koji.simplepaymentapi.services;
 
+import jakarta.validation.Valid;
 import me.koji.simplepaymentapi.dto.ClientUserDTO;
 import me.koji.simplepaymentapi.models.ClientUser;
 import me.koji.simplepaymentapi.repository.UserRepository;
