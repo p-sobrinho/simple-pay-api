@@ -1,5 +1,6 @@
 package me.koji.simplepaymentapi.controller;
 
+import jakarta.validation.Valid;
 import me.koji.simplepaymentapi.dto.ClientTransactionDTO;
 import me.koji.simplepaymentapi.exceptions.InvalidUserException;
 import me.koji.simplepaymentapi.mappers.TransactionMapper;
@@ -37,7 +38,7 @@ public class TransactionController {
     }
 
     @PostMapping
-    public ResponseEntity<ClientTransactionDTO> createTransaction(@RequestBody ClientTransactionDTO userDTO) {
+    public ResponseEntity<ClientTransactionDTO> createTransaction(@RequestBody @Valid ClientTransactionDTO userDTO) {
         final ClientTransaction clientTransaction = transactionService.createTransactionByDTO(userDTO);
         final ClientTransaction savedTransaction = transactionService.saveTransaction(clientTransaction);
 
