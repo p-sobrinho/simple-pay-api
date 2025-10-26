@@ -37,9 +37,6 @@ public class UserServiceImpl implements UserService {
         if (balance == null) balance = BigDecimal.ZERO;
         if (type == null) type = ClientUserType.COMMON;
 
-        if (findUserById(id).isPresent())
-            throw new IllegalArgumentException("Unable to create user, id \"" + id + "\" already exists.");
-
         return new ClientUser(id, firstName, lastName, email, cpf, password, balance, type);
     }
 

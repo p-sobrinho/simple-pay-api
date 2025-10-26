@@ -42,11 +42,6 @@ public class TransactionServiceImpl implements TransactionService {
 
         if (value == null) value = BigDecimal.ZERO;
 
-        if (id != null) {
-            if (findTransactionById(id).isPresent())
-                throw new IllegalArgumentException("Unable to create transaction, id \"" + id + "\" already exists.");
-        }
-
         final Optional<ClientUser> senderUserOptional = userService.findUserById(sender);
 
         senderUserOptional.ifPresent((senderUser) -> {
