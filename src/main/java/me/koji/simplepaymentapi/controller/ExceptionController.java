@@ -9,6 +9,9 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestControllerAdvice
 public class ExceptionController {
     @ExceptionHandler(IllegalArgumentException.class)
@@ -21,9 +24,19 @@ public class ExceptionController {
         return ResponseEntity.internalServerError().body(new ServerInternalErrorDTO(exception.getMessage(), 500));
     }
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> handleValidationErrors(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+
+        ex.getBindingResult().getFieldErrors().forEach(error ->
+                errors.put(error.getField(), error.getDefaultMessage())
+        );
+
+        return ResponseEntity.badRequest().body(errors);
+    }
+
     @ExceptionHandler({
             HttpMessageNotReadableException.class,
-            MethodArgumentNotValidException.class,
             MissingServletRequestParameterException.class
     })
     public ResponseEntity<ServerInternalErrorDTO> handleBadRequest(Exception ex) {
