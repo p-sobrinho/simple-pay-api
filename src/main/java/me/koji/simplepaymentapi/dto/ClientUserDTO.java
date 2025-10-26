@@ -17,9 +17,11 @@ public record ClientUserDTO(
         @Email(message = "Email must be valid.")
         @NotBlank(message = "Email is required.")
         String email,
-        @Pattern(regexp = "\\d{11}", message = "CPF must have 11 digits.")
+        @NotBlank(message = "CPF is required.")
+        @Size(min = 11, max = 11, message = "CPF must have 11 digits.")
         String cpf,
-        @Size(min = 8, message = "Password size must be equals or greater than 8.")
+        @NotBlank(message = "Password is required.")
+        @Size(min = 8, max = 32, message = "Password size must be equals or greater than 8.")
         String password,
         BigDecimal balance, ClientUserType type
 ){ }
