@@ -17,9 +17,11 @@ import java.util.Optional;
 @RequestMapping("/users")
 public class UserController {
     private final UserService userService;
+    private final UserMapper userMapper;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, UserMapper userMapper) {
         this.userService = userService;
+        this.userMapper = userMapper;
     }
 
     @GetMapping("/{id}")
@@ -29,12 +31,12 @@ public class UserController {
         if (queryUser.isEmpty())
             throw new InvalidUserException("Unable to find user with id: {0}.", id);
 
-        return ResponseEntity.ok(UserMapper.toDTO(queryUser.get()));
+        return ResponseEntity.ok(userMapper.toDTO(queryUser.get()));
     }
 
     @GetMapping
     public ResponseEntity<Page<ClientUserDTO>> getAllUsers(Pageable pageable) {
-        return ResponseEntity.ok(userService.getAllUsers(pageable).map(UserMapper::toDTO));
+        return ResponseEntity.ok(userService.getAllUsers(pageable).map(userMapper::toDTO));
     }
 
     @PostMapping
@@ -42,6 +44,6 @@ public class UserController {
         final ClientUser clientUser = userService.createUserByDTO(userDTO);
         final ClientUser savedUser = userService.saveUser(clientUser);
 
-        return ResponseEntity.ok(UserMapper.toDTO(savedUser));
+        return ResponseEntity.ok(userMapper.toDTO(savedUser));
     }
 }

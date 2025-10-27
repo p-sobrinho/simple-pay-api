@@ -20,9 +20,11 @@ import java.util.Optional;
 @RequestMapping("/transactions")
 public class TransactionController {
     private final TransactionService transactionService;
+    private final TransactionMapper transactionMapper;
 
-    public TransactionController(TransactionService transactionService) {
+    public TransactionController(TransactionService transactionService, TransactionMapper transactionMapper) {
         this.transactionService = transactionService;
+        this.transactionMapper = transactionMapper;
     }
 
     @GetMapping("/{id}")
@@ -32,12 +34,12 @@ public class TransactionController {
         if (queryTransaction.isEmpty())
             throw new InvalidTransactionException("Unable to find transaction with id: {0}.", id);
 
-        return ResponseEntity.ok(TransactionMapper.toDTO(queryTransaction.get()));
+        return ResponseEntity.ok(transactionMapper.toDTO(queryTransaction.get()));
     }
 
     @GetMapping
     public ResponseEntity<Page<ClientTransactionDTO>> getAllTransactions(Pageable pageable) {
-        return ResponseEntity.ok(transactionService.getAllTransactions(pageable).map(TransactionMapper::toDTO));
+        return ResponseEntity.ok(transactionService.getAllTransactions(pageable).map(transactionMapper::toDTO));
     }
 
     @PostMapping
@@ -50,7 +52,7 @@ public class TransactionController {
         final ClientTransaction clientTransaction = transactionService.createTransactionByDTO(transactionDTO);
         final ClientTransaction savedTransaction = transactionService.saveTransaction(clientTransaction);
 
-        return ResponseEntity.ok(TransactionMapper.toDTO(savedTransaction));
+        return ResponseEntity.ok(transactionMapper.toDTO(savedTransaction));
     }
 
     @DeleteMapping("/{id}")
