@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import me.koji.simplepaymentapi.exceptions.NotEnoughBalanceException;
 import me.koji.simplepaymentapi.types.ClientUserType;
 
 import java.math.BigDecimal;
@@ -41,6 +42,9 @@ public class ClientUser {
     }
     public BigDecimal subtractBalance(BigDecimal amount) {
         final BigDecimal subtractedBalance = balance.subtract(amount);
+        if (subtractedBalance.intValue() < 0)
+            throw new NotEnoughBalanceException("Balance is not enough to subtract in user id: {}.", id);
+
         this.balance = subtractedBalance;
 
         return subtractedBalance;

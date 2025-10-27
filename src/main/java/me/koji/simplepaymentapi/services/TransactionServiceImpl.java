@@ -90,7 +90,7 @@ public class TransactionServiceImpl implements TransactionService {
         sender.subtractBalance(clientTransaction.getValue());
         receiver.addBalance(clientTransaction.getValue());
 
-        // To make sure that transaction can be saved before charging from sender.
+        // To make sure that transaction can be saved before saving charge from sender balance.
         final ClientTransaction savedTransaction = transactionRepository.save(clientTransaction);
 
         userService.saveUser(sender);

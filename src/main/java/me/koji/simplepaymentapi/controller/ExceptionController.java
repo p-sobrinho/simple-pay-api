@@ -2,6 +2,7 @@ package me.koji.simplepaymentapi.controller;
 
 import me.koji.simplepaymentapi.dto.ServerInternalErrorDTO;
 import me.koji.simplepaymentapi.exceptions.InvalidUserException;
+import me.koji.simplepaymentapi.exceptions.NotEnoughBalanceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -43,5 +44,10 @@ public class ExceptionController {
         return ResponseEntity
                 .badRequest()
                 .body(new ServerInternalErrorDTO(ex.getMessage(), 400));
+    }
+
+    @ExceptionHandler(NotEnoughBalanceException.class)
+    public ResponseEntity<ServerInternalErrorDTO> handleNotEnoughBalance(NotEnoughBalanceException exception) {
+        return ResponseEntity.internalServerError().body(new ServerInternalErrorDTO(exception.getMessage(), 500));
     }
 }
