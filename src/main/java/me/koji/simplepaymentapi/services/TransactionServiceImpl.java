@@ -1,38 +1,41 @@
 package me.koji.simplepaymentapi.services;
 
-import jakarta.validation.Valid;
-import lombok.extern.flogger.Flogger;
 import lombok.extern.slf4j.Slf4j;
+import me.koji.simplepaymentapi.dto.AuthorizationDTO;
 import me.koji.simplepaymentapi.dto.ClientTransactionDTO;
+import me.koji.simplepaymentapi.exceptions.AuthenticationException;
+import me.koji.simplepaymentapi.exceptions.FailedToAuthenticate;
 import me.koji.simplepaymentapi.exceptions.InvalidUserException;
 import me.koji.simplepaymentapi.models.ClientTransaction;
 import me.koji.simplepaymentapi.models.ClientUser;
 import me.koji.simplepaymentapi.repository.TransactionRepository;
-import me.koji.simplepaymentapi.repository.UserRepository;
 import me.koji.simplepaymentapi.services.contracts.TransactionService;
 import me.koji.simplepaymentapi.services.contracts.UserService;
 import me.koji.simplepaymentapi.types.ClientUserType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 @Service
 @Slf4j
 public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
     private final UserService userService;
+    private final RestTemplate restTemplate;
+    private final String authURL = "https://util.devi.tools/api/v2/authorize";
 
-    public TransactionServiceImpl(TransactionRepository transactionRepository, UserService userService) {
+    public TransactionServiceImpl(TransactionRepository transactionRepository, UserService userService, RestTemplate restTemplate) {
         this.transactionRepository = transactionRepository;
         this.userService = userService;
+        this.restTemplate = restTemplate;
     }
 
     @Override
@@ -41,9 +44,10 @@ public class TransactionServiceImpl implements TransactionService {
             String message, BigDecimal value, Instant timestamp
     ) {
         final Optional<ClientUser> senderUserOptional = userService.findUserById(sender);
+
         senderUserOptional.ifPresent((senderUser) -> {
             if (senderUser.getType() == ClientUserType.MERCHANT)
-                throw new IllegalArgumentException("Unable to create transaction, merchant users can't make transactions.");
+                throw new AuthenticationException("Unable to create transaction, merchant users can't make transactions.");
         });
 
         if (timestamp == null) timestamp = Instant.now();
@@ -86,10 +90,19 @@ public class TransactionServiceImpl implements TransactionService {
         final ClientUser receiver = receiverUserOptional.get();
 
         if (sender.getType() == ClientUserType.MERCHANT)
-            throw new IllegalArgumentException("Transaction not allowed, merchants can't make transactions.");
+            throw new AuthenticationException("Transaction not allowed, merchants can't make transactions.");
 
         sender.subtractBalance(clientTransaction.getValue());
         receiver.addBalance(clientTransaction.getValue());
+
+        // Auth in mock.
+        ResponseEntity<AuthorizationDTO> authDTO = restTemplate.getForEntity(authURL, AuthorizationDTO.class);
+
+        if (!authDTO.getStatusCode().is2xxSuccessful())
+            throw new FailedToAuthenticate("Unable to contact authentication service, try again later.");
+
+        if (!authDTO.getBody().data().authorization())
+            throw new AuthenticationException("User is not authorized to perform this action.");
 
         // To make sure that transaction can be saved before saving charge from sender balance.
         final ClientTransaction savedTransaction = transactionRepository.save(clientTransaction);
