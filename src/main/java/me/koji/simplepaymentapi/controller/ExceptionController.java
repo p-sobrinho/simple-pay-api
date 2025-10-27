@@ -1,9 +1,7 @@
 package me.koji.simplepaymentapi.controller;
 
 import me.koji.simplepaymentapi.dto.ServerInternalErrorDTO;
-import me.koji.simplepaymentapi.exceptions.EqualsUserTransactionException;
-import me.koji.simplepaymentapi.exceptions.InvalidUserException;
-import me.koji.simplepaymentapi.exceptions.NotEnoughBalanceException;
+import me.koji.simplepaymentapi.exceptions.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -16,10 +14,7 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class ExceptionController {
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ServerInternalErrorDTO> handleIllegalArgument(IllegalArgumentException exception) {
-        return ResponseEntity.badRequest().body(new ServerInternalErrorDTO(exception.getMessage(), 400));
-    }
+    private final int FORBIDDEN_CODE = 403;
 
     @ExceptionHandler(InvalidUserException.class)
     public ResponseEntity<ServerInternalErrorDTO> handleInvalidUser(InvalidUserException exception) {
@@ -27,7 +22,7 @@ public class ExceptionController {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationErrors(MethodArgumentNotValidException ex) {
+    public ResponseEntity<Map<String, String>> handleArgumentNotValid(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
 
         ex.getBindingResult().getFieldErrors().forEach(error ->
@@ -55,5 +50,16 @@ public class ExceptionController {
     @ExceptionHandler(EqualsUserTransactionException.class)
     public ResponseEntity<ServerInternalErrorDTO> handleEqualsUserTransaction(EqualsUserTransactionException exception) {
         return ResponseEntity.internalServerError().body(new ServerInternalErrorDTO(exception.getMessage(), 500));
+    }
+
+    @ExceptionHandler(FailedToAuthenticate.class)
+    public ResponseEntity<ServerInternalErrorDTO> handleFailedToAuthenticate(FailedToAuthenticate exception) {
+        return ResponseEntity.internalServerError().body(new ServerInternalErrorDTO(exception.getMessage(), 500));
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ServerInternalErrorDTO> handleAuthentication(AuthenticationException exception) {
+        return ResponseEntity.status(FORBIDDEN_CODE)
+                .body(new ServerInternalErrorDTO(exception.getMessage(), FORBIDDEN_CODE));
     }
 }
