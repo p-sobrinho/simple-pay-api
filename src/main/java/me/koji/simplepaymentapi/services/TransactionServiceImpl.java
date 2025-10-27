@@ -96,12 +96,17 @@ public class TransactionServiceImpl implements TransactionService {
         receiver.addBalance(clientTransaction.getValue());
 
         // Auth in mock.
-        ResponseEntity<AuthorizationDTO> authDTO = restTemplate.getForEntity(authURL, AuthorizationDTO.class);
+        final ResponseEntity<AuthorizationDTO> authDTO = restTemplate.getForEntity(authURL, AuthorizationDTO.class);
 
         if (!authDTO.getStatusCode().is2xxSuccessful())
             throw new FailedToAuthenticate("Unable to contact authentication service, try again later.");
 
-        if (!authDTO.getBody().data().authorization())
+        final AuthorizationDTO dataDTO = authDTO.getBody();
+
+        if (dataDTO == null)
+            throw new FailedToAuthenticate("Authentication failed to return response.");
+
+        if (dataDTO.data().authorization())
             throw new AuthenticationException("User is not authorized to perform this action.");
 
         // To make sure that transaction can be saved before saving charge from sender balance.
