@@ -28,7 +28,7 @@ public class ClientTransaction {
     private BigDecimal value;
 
     @Column(nullable = false)
-    private Instant timestamp = Instant.now(); //Default value
+    private Instant timestamp;
 
     @Override
     public final boolean equals(Object other) {
