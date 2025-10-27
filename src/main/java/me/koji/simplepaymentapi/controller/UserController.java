@@ -27,7 +27,7 @@ public class UserController {
         final Optional<ClientUser> queryUser = userService.findUserById(id);
 
         if (queryUser.isEmpty())
-            throw new InvalidUserException("Unable to find user with id: {}.", id);
+            throw new InvalidUserException("Unable to find user with id: {0}.", id);
 
         return ResponseEntity.ok(UserMapper.toDTO(queryUser.get()));
     }

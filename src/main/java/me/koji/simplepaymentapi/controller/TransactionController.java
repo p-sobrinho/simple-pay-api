@@ -27,7 +27,7 @@ public class TransactionController {
         final Optional<ClientTransaction> queryUser = transactionService.findTransactionById(id);
 
         if (queryUser.isEmpty())
-            throw new InvalidUserException("Unable to find transaction with id: {}.", id);
+            throw new InvalidUserException("Unable to find transaction with id: {0}.", id);
 
         return ResponseEntity.ok(TransactionMapper.toDTO(queryUser.get()));
     }

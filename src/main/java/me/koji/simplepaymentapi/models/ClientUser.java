@@ -43,7 +43,7 @@ public class ClientUser {
     public BigDecimal subtractBalance(BigDecimal amount) {
         final BigDecimal subtractedBalance = balance.subtract(amount);
         if (subtractedBalance.intValue() < 0)
-            throw new NotEnoughBalanceException("Balance is not enough to subtract in user id: {}.", id);
+            throw new NotEnoughBalanceException("Balance is not enough to subtract in user id: {0}.", id);
 
         this.balance = subtractedBalance;
 
