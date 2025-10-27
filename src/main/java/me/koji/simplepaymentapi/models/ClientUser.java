@@ -34,6 +34,10 @@ public class ClientUser {
     @Column(nullable = false) @Enumerated(EnumType.STRING)
     private ClientUserType type;
 
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
+
     public BigDecimal addBalance(BigDecimal amount) {
         final BigDecimal addedBalance = balance.add(amount);
         this.balance = addedBalance;
