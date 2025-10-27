@@ -2,6 +2,7 @@ package me.koji.simplepaymentapi.controller;
 
 import jakarta.validation.Valid;
 import me.koji.simplepaymentapi.dto.ClientTransactionDTO;
+import me.koji.simplepaymentapi.exceptions.EqualsUserTransactionException;
 import me.koji.simplepaymentapi.exceptions.InvalidUserException;
 import me.koji.simplepaymentapi.mappers.TransactionMapper;
 import me.koji.simplepaymentapi.models.ClientTransaction;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -38,8 +40,13 @@ public class TransactionController {
     }
 
     @PostMapping
-    public ResponseEntity<ClientTransactionDTO> createTransaction(@RequestBody @Valid ClientTransactionDTO userDTO) {
-        final ClientTransaction clientTransaction = transactionService.createTransactionByDTO(userDTO);
+    public ResponseEntity<ClientTransactionDTO> createTransaction(@RequestBody @Valid ClientTransactionDTO transactionDTO) {
+        if (Objects.equals(transactionDTO.sender(), transactionDTO.receiver()))
+            throw new EqualsUserTransactionException(
+                    "Sender and receiver are the same user, doesn't make sense send money to itself."
+            );
+
+        final ClientTransaction clientTransaction = transactionService.createTransactionByDTO(transactionDTO);
         final ClientTransaction savedTransaction = transactionService.saveTransaction(clientTransaction);
 
         return ResponseEntity.ok(TransactionMapper.toDTO(savedTransaction));
