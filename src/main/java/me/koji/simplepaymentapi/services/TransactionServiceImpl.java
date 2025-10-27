@@ -9,6 +9,7 @@ import me.koji.simplepaymentapi.exceptions.InvalidUserException;
 import me.koji.simplepaymentapi.models.ClientTransaction;
 import me.koji.simplepaymentapi.models.ClientUser;
 import me.koji.simplepaymentapi.repository.TransactionRepository;
+import me.koji.simplepaymentapi.services.contracts.NotificationService;
 import me.koji.simplepaymentapi.services.contracts.TransactionService;
 import me.koji.simplepaymentapi.services.contracts.UserService;
 import me.koji.simplepaymentapi.types.ClientUserType;
@@ -17,10 +18,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.text.MessageFormat;
 import java.time.Instant;
 import java.util.Optional;
 
@@ -29,12 +30,17 @@ import java.util.Optional;
 public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
     private final UserService userService;
+    private final NotificationService notificationService;
     private final RestTemplate restTemplate;
     private final String authURL = "https://util.devi.tools/api/v2/authorize";
 
-    public TransactionServiceImpl(TransactionRepository transactionRepository, UserService userService, RestTemplate restTemplate) {
+    public TransactionServiceImpl(
+            TransactionRepository transactionRepository, UserService userService,
+            NotificationService notificationService, RestTemplate restTemplate
+    ) {
         this.transactionRepository = transactionRepository;
         this.userService = userService;
+        this.notificationService = notificationService;
         this.restTemplate = restTemplate;
     }
 
@@ -114,6 +120,16 @@ public class TransactionServiceImpl implements TransactionService {
 
         userService.saveUser(sender);
         userService.saveUser(receiver);
+
+        if (!notificationService.sendNotification(sender,
+                MessageFormat.format("You sent {0} to {1}!", clientTransaction.getValue(), receiver.getFullName())
+        ))
+            log.warn("Failed to send notification to sender!");
+
+        if (!notificationService.sendNotification(sender,
+                MessageFormat.format("You received {0} from {1}!", clientTransaction.getValue(), sender.getFullName())
+        ))
+            log.warn("Failed to send notification to receiver!");
 
         return savedTransaction;
     }
