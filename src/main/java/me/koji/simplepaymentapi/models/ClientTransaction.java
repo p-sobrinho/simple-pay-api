@@ -1,6 +1,7 @@
 package me.koji.simplepaymentapi.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,7 +27,7 @@ public class ClientTransaction {
     private String message;
 
     @Column(nullable = false)
-    @Min(value = 1, message = "Transaction can't be lower than 1.0.")
+    @DecimalMin(value = "1.0", message = "Transaction value can't be lower than 1.0.")
     private BigDecimal value;
 
     @Column(nullable = false)

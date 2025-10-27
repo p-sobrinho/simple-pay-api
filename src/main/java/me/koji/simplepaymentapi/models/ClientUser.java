@@ -1,6 +1,7 @@
 package me.koji.simplepaymentapi.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,7 +29,7 @@ public class ClientUser {
     private String cpf;
     @Column(nullable = false)
     private String password;
-    @Column(nullable = false)
+    @Column(nullable = false) @DecimalMin(value = "0.0", message = "Balance can't be negative.")
     private BigDecimal balance;
 
     @Column(nullable = false) @Enumerated(EnumType.STRING)
