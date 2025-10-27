@@ -34,10 +34,16 @@ public class ClientUser {
     private ClientUserType type = ClientUserType.COMMON; //Default value
 
     public BigDecimal addBalance(BigDecimal amount) {
-        return balance.add(amount);
+        final BigDecimal addedBalance = balance.add(amount);
+        this.balance = addedBalance;
+
+        return addedBalance;
     }
     public BigDecimal subtractBalance(BigDecimal amount) {
-        return balance.subtract(amount);
+        final BigDecimal subtractedBalance = balance.subtract(amount);
+        this.balance = subtractedBalance;
+
+        return subtractedBalance;
     }
 
     @Override
