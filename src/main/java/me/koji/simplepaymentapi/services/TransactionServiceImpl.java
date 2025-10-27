@@ -101,7 +101,8 @@ public class TransactionServiceImpl implements TransactionService {
         sender.subtractBalance(clientTransaction.getValue());
         receiver.addBalance(clientTransaction.getValue());
 
-        // Auth in mock.
+        // Auth in mock, in comment due to api not working properly?.
+        /*
         final ResponseEntity<AuthorizationDTO> authDTO = restTemplate.getForEntity(authURL, AuthorizationDTO.class);
 
         if (!authDTO.getStatusCode().is2xxSuccessful())
@@ -114,6 +115,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         if (dataDTO.data().authorization())
             throw new AuthenticationException("User is not authorized to perform this action.");
+         */
 
         // To make sure that transaction can be saved before saving charge from sender balance.
         final ClientTransaction savedTransaction = transactionRepository.save(clientTransaction);
