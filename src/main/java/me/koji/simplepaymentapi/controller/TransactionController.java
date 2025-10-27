@@ -36,7 +36,7 @@ public class TransactionController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<ClientTransactionDTO>> getAllTransactions(@RequestBody Pageable pageable) {
+    public ResponseEntity<Page<ClientTransactionDTO>> getAllTransactions(Pageable pageable) {
         return ResponseEntity.ok(transactionService.getAllTransactions(pageable).map(TransactionMapper::toDTO));
     }
 
