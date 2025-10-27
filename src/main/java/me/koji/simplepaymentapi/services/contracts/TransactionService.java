@@ -20,4 +20,6 @@ public interface TransactionService {
     Page<ClientTransaction> getAllTransactions(Pageable pageable);
 
     ClientTransaction saveTransaction(ClientTransaction clientTransaction);
+
+    void revertTransaction(ClientTransaction clientTransaction);
 }

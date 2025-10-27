@@ -1,6 +1,8 @@
 package me.koji.simplepaymentapi.services;
 
 import jakarta.validation.Valid;
+import lombok.extern.flogger.Flogger;
+import lombok.extern.slf4j.Slf4j;
 import me.koji.simplepaymentapi.dto.ClientTransactionDTO;
 import me.koji.simplepaymentapi.exceptions.InvalidUserException;
 import me.koji.simplepaymentapi.models.ClientTransaction;
@@ -23,8 +25,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 @Service
+@Slf4j
 public class TransactionServiceImpl implements TransactionService {
-    private final List<String> nullablesNotAllowed = List.of("sender", "receiver", "value", "timestamp");
     private final TransactionRepository transactionRepository;
     private final UserService userService;
 
@@ -39,7 +41,6 @@ public class TransactionServiceImpl implements TransactionService {
             String message, BigDecimal value, Instant timestamp
     ) {
         final Optional<ClientUser> senderUserOptional = userService.findUserById(sender);
-
         senderUserOptional.ifPresent((senderUser) -> {
             if (senderUser.getType() == ClientUserType.MERCHANT)
                 throw new IllegalArgumentException("Unable to create transaction, merchant users can't make transactions.");
@@ -97,6 +98,28 @@ public class TransactionServiceImpl implements TransactionService {
         userService.saveUser(receiver);
 
         return savedTransaction;
+    }
+
+    @Override
+    public void revertTransaction(ClientTransaction clientTransaction) {
+        final Optional<ClientUser> senderUserOptional = userService.findUserById(clientTransaction.getSender());
+        final Optional<ClientUser> receiverUserOptional = userService.findUserById(clientTransaction.getReceiver());
+
+        senderUserOptional.ifPresentOrElse((senderUser) ->
+                senderUser.addBalance(clientTransaction.getValue()),
+                () -> log.warn("Unable to increase sender balance, can't find sender user.")
+        );
+
+        receiverUserOptional.ifPresentOrElse((senderUser) ->
+                        senderUser.subtractBalance(clientTransaction.getValue()),
+                () -> log.warn("Unable to decrease receiver balance, can't find receiver user.")
+        );
+
+        // To make sure that transaction got delete before reverting balance.
+        transactionRepository.deleteById(clientTransaction.getId());
+
+        senderUserOptional.ifPresent(userService::saveUser);
+        receiverUserOptional.ifPresent(userService::saveUser);
     }
 }
 

@@ -3,6 +3,7 @@ package me.koji.simplepaymentapi.controller;
 import jakarta.validation.Valid;
 import me.koji.simplepaymentapi.dto.ClientTransactionDTO;
 import me.koji.simplepaymentapi.exceptions.EqualsUserTransactionException;
+import me.koji.simplepaymentapi.exceptions.InvalidTransactionException;
 import me.koji.simplepaymentapi.exceptions.InvalidUserException;
 import me.koji.simplepaymentapi.mappers.TransactionMapper;
 import me.koji.simplepaymentapi.models.ClientTransaction;
@@ -26,12 +27,12 @@ public class TransactionController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ClientTransactionDTO> getTransaction(@PathVariable Long id) {
-        final Optional<ClientTransaction> queryUser = transactionService.findTransactionById(id);
+        final Optional<ClientTransaction> queryTransaction = transactionService.findTransactionById(id);
 
-        if (queryUser.isEmpty())
-            throw new InvalidUserException("Unable to find transaction with id: {0}.", id);
+        if (queryTransaction.isEmpty())
+            throw new InvalidTransactionException("Unable to find transaction with id: {0}.", id);
 
-        return ResponseEntity.ok(TransactionMapper.toDTO(queryUser.get()));
+        return ResponseEntity.ok(TransactionMapper.toDTO(queryTransaction.get()));
     }
 
     @GetMapping
@@ -50,5 +51,17 @@ public class TransactionController {
         final ClientTransaction savedTransaction = transactionService.saveTransaction(clientTransaction);
 
         return ResponseEntity.ok(TransactionMapper.toDTO(savedTransaction));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<String> deleteTransaction(@PathVariable Long id) {
+        final Optional<ClientTransaction> queryTransaction = transactionService.findTransactionById(id);
+
+        if (queryTransaction.isEmpty())
+            throw new InvalidTransactionException("Unable to find transaction with id: {0}.", id);
+
+        transactionService.revertTransaction(queryTransaction.get());
+
+        return ResponseEntity.ok("Transaction with id: " + id + " has been deleted and reverted.");
     }
 }
