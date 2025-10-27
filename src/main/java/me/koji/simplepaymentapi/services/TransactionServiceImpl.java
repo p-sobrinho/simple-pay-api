@@ -45,6 +45,8 @@ public class TransactionServiceImpl implements TransactionService {
                 throw new IllegalArgumentException("Unable to create transaction, merchant users can't make transactions.");
         });
 
+        if (timestamp == null) timestamp = Instant.now();
+
         return new ClientTransaction(id, sender, receiver, message, value, timestamp);
     }
 
