@@ -53,7 +53,7 @@ public class TransactionController {
         return ResponseEntity.ok(TransactionMapper.toDTO(savedTransaction));
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteTransaction(@PathVariable Long id) {
         final Optional<ClientTransaction> queryTransaction = transactionService.findTransactionById(id);
 
