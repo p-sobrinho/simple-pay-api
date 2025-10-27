@@ -31,7 +31,7 @@ public class ClientUser {
     @Column(nullable = false)
     private BigDecimal balance;
 
-    @Enumerated(EnumType.STRING)
+    @Column(nullable = false) @Enumerated(EnumType.STRING)
     private ClientUserType type = ClientUserType.COMMON; //Default value
 
     public BigDecimal addBalance(BigDecimal amount) {
