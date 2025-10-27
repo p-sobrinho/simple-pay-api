@@ -29,11 +29,10 @@ public class ClientUser {
     private String cpf;
     @Column(nullable = false)
     private String password;
-    @Column(nullable = false) @DecimalMin(value = "0.0", message = "Balance can't be negative.")
+    @Column(nullable = false)
     private BigDecimal balance;
-
     @Column(nullable = false) @Enumerated(EnumType.STRING)
-    private ClientUserType type = ClientUserType.COMMON; //Default value
+    private ClientUserType type;
 
     public BigDecimal addBalance(BigDecimal amount) {
         final BigDecimal addedBalance = balance.add(amount);
